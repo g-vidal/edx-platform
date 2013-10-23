@@ -4,6 +4,7 @@ from oauthlib.oauth1.rfc5849 import signature
 import mock
 import sys
 from logging import getLogger
+import requests
 logger = getLogger(__name__)
 
 
@@ -39,33 +40,38 @@ class MockLTIRequestHandler(BaseHTTPRequestHandler):
             self.path)
         )  # Log the request
 
+        is_gradeable = False
         # Respond only to requests with correct lti endpoint:
         if self._is_correct_lti_request():
-            correct_keys = [
-                'user_id',
-                'role',
-                'oauth_nonce',
-                'oauth_timestamp',
-                'oauth_consumer_key',
-                'lti_version',
-                'oauth_signature_method',
-                'oauth_version',
-                'oauth_signature',
-                'lti_message_type',
-                'oauth_callback',
-                'lis_outcome_service_url',
-                'lis_result_sourcedid',
-                'launch_presentation_return_url'
-            ]
+            if not is_gradeable:
+                correct_keys = [
+                    'user_id',
+                    'role',
+                    'oauth_nonce',
+                    'oauth_timestamp',
+                    'oauth_consumer_key',
+                    'lti_version',
+                    'oauth_signature_method',
+                    'oauth_version',
+                    'oauth_signature',
+                    'lti_message_type',
+                    'oauth_callback',
+                    'lis_outcome_service_url',
+                    'lis_result_sourcedid',
+                    'launch_presentation_return_url'
+                ]
 
-            if sorted(correct_keys) != sorted(post_dict.keys()):
-                status_message = "Incorrect LTI header"
-            else:
-                params = {k: v for k, v in post_dict.items() if k != 'oauth_signature'}
-                if self.server.check_oauth_signature(params, post_dict['oauth_signature']):
-                    status_message = "This is LTI tool. Success."
+                if sorted(correct_keys) != sorted(post_dict.keys()):
+                    status_message = "Incorrect LTI header"
                 else:
-                    status_message = "Wrong LTI signature"
+                    params = {k: v for k, v in post_dict.items() if k != 'oauth_signature'}
+                    if self.server.check_oauth_signature(params, post_dict['oauth_signature']):
+                        status_message = "This is LTI tool. Success."
+                    else:
+                        status_message = "Wrong LTI signature"
+            else:
+                callback_url = '127.0.0.1/courses'
+                request.POST
         else:
             status_message = "Invalid request URL"
 

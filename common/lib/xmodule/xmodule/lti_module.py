@@ -14,7 +14,7 @@ from xmodule.raw_module import EmptyDataRawDescriptor
 from xmodule.x_module import XModule
 from xmodule.course_module import CourseDescriptor
 from pkg_resources import resource_string
-from xblock.core import String, Scope, List
+from xblock.core import String, Scope, List, Float
 from xblock.fields import Boolean
 
 log = logging.getLogger(__name__)
@@ -48,6 +48,8 @@ class LTIFields(object):
     launch_url = String(help="URL of the tool", default='http://www.example.com', scope=Scope.settings)
     custom_parameters = List(help="Custom parameters (vbid, book_location, etc..)", scope=Scope.settings)
     open_in_a_new_page = Boolean(help="Should LTI be opened in new page?", default=True, scope=Scope.settings)
+    graded = Boolean(help="Should LTI be graded?", default=False, scope=Scope.settings)
+    weight = Float(help="Weight for student grades", default=1.0, scope=Scope.settings)
 
 
 class LTIModule(LTIFields, XModule):

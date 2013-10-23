@@ -277,6 +277,10 @@ if settings.COURSEWARE_ENABLED:
         url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/staff_grading/get_problem_list$',
             'open_ended_grading.staff_grading_service.get_problem_list', name='staff_grading_get_problem_list'),
 
+        # grade lti
+        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/grade_lti/?P<student_id>/?P<problem_id>/?P<score>$',
+            'instructor.views.legacy.gradebook', name='gradebook'),
+
         # Open Ended problem list
         url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/open_ended_problems$',
             'open_ended_grading.views.student_problem_list', name='open_ended_problems'),
