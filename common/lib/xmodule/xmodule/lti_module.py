@@ -231,6 +231,12 @@ class LTIModule(LTIFields, XModule):
 
         return self.system.render_template('lti.html', context)
 
+    def set_callback_url(self):
+        if self.graded:
+            return '127.0.0.1/lti_endpoint/grade'
+        else:
+            return ''
+
     def oauth_params(self, custom_parameters, client_key, client_secret):
         """
         Signs request and returns signature and oauth parameters.
@@ -255,7 +261,7 @@ class LTIModule(LTIFields, XModule):
             u'user_id': user_id,
             u'oauth_callback': u'about:blank',
             u'lis_outcome_service_url': '',
-            u'lis_result_sourcedid': '',
+            u'lis_result_sourcedid': self.set_callback_url(),
             u'launch_presentation_return_url': '',
             u'lti_message_type': u'basic-lti-launch-request',
             u'lti_version': 'LTI-1p0',
@@ -302,6 +308,8 @@ oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"'}
         # add lti parameters to oauth parameters for sending in form
         params.update(body)
         return params
+
+
 
 
 class LTIModuleDescriptor(LTIFields, MetadataOnlyEditingDescriptor, EmptyDataRawDescriptor):
