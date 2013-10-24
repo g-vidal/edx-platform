@@ -7,6 +7,9 @@ the top.  Include a label indicating the component affected.
 
 Blades: Disallow users to enter video url's in http.
 
+Blades: Latex problems are now enabled via use_latex_compiler
+key in course settings. (BLD-426)
+
 Blades: Fix bug when the speed can only be changed when the video is playing.
 
 LMS: Change bulk email implementation to use less memory, and to better handle
@@ -48,7 +51,7 @@ on the request instead of overwriting the POST attr
 
 ---------- split mongo backend refactoring changelog section ------------
 
-Studio: course catalog, assets, checklists, course outline pages now use course 
+Studio: course catalog, assets, checklists, course outline pages now use course
 id syntax w/ restful api style
 
 Common:
@@ -57,7 +60,7 @@ Common:
 
 Common: location mapper: % encode periods and dollar signs when used as key in the mapping dict
 
-Common: location mapper: added a bunch of new helper functions for generating 
+Common: location mapper: added a bunch of new helper functions for generating
 old location style info from a CourseLocator
 
 Common: locators: allow - ~ and . in course, branch, and block ids.

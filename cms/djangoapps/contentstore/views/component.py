@@ -193,12 +193,13 @@ def edit_unit(request, location):
         # add boilerplates
         if hasattr(component_class, 'templates'):
             for template in component_class.templates():
-                component_templates[category].append((
-                    template['metadata'].get('display_name'),
-                    category,
-                    template['metadata'].get('markdown') is not None,
-                    template.get('template_id')
-                ))
+                if getattr(component_class, 'filter_templates', lambda *x: True)(template, course):
+                    component_templates[category].append((
+                        template['metadata'].get('display_name'),
+                        category,
+                        template['metadata'].get('markdown') is not None,
+                        template.get('template_id')
+                    ))
 
     # Check if there are any advanced modules specified in the course policy.
     # These modules should be specified as a list of strings, where the strings
