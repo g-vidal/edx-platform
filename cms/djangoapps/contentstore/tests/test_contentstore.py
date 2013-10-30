@@ -401,6 +401,7 @@ class ContentStoreToyCourseTest(ModuleStoreTestCase):
         module_store = modulestore('direct')
         CourseFactory.create(org='edX', course='999', display_name='Robot Super Course')
         course_location = Location(['i4x', 'edX', '999', 'course', 'Robot_Super_Course', None])
+        new_location = loc_mapper().translate_location(course_location.course_id, course_location, False, True)
 
         ItemFactory.create(
             parent_location=course_location,
@@ -419,7 +420,7 @@ class ContentStoreToyCourseTest(ModuleStoreTestCase):
             if tab['type'] == 'static_tab':
                 reverse_tabs.insert(0, 'i4x://edX/999/static_tab/{0}'.format(tab['url_slug']))
 
-        self.client.ajax_post(reverse('reorder_static_tabs'), {'tabs': reverse_tabs})
+        self.client.ajax_post(new_location.url_reverse('tabs'), {'tabs': reverse_tabs})
 
         course = module_store.get_item(Location(['i4x', 'edX', '999', 'course', 'Robot_Super_Course', None]))
 
