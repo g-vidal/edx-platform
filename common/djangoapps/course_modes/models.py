@@ -11,7 +11,6 @@ from django.db.models import Q
 
 Mode = namedtuple('Mode', ['slug', 'name', 'min_price', 'suggested_prices', 'currency', 'expiration_date'])
 
-
 class CourseMode(models.Model):
     """
     We would like to offer a course in a variety of modes.

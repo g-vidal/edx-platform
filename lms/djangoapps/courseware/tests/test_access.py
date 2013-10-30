@@ -12,6 +12,7 @@ from django.utils.timezone import UTC
 
 from student.tests.factories import UserFactory
 from xmodule.modulestore.tests.factories import CourseFactory
+from course_modes.tests.factories import CourseModeFactory
 
 
 @override_settings(MODULESTORE=TEST_DATA_MIXED_MODULESTORE)
@@ -116,17 +117,18 @@ class AccessTestCase(TestCase):
     def test__has_access_refund(self):
         user = UserFactory.create()
         course = CourseFactory.create(org='org', number='test', run='course', display_name='Test Course')
+        course_mode = CourseModeFactory.create(course_id=course.location.course_id, mode_slug='verified')
         today = datetime.datetime.now(UTC())
         grace_period = datetime.timedelta(days=14)
         one_day_extra = datetime.timedelta(days=1)
 
         # User is allowed to receive refund if it is within two weeks of course start date
-        course.enrollment_start = (today - one_day_extra)
+        course_mode.expiration_date = (today - one_day_extra)
         self.assertTrue(access._has_access_course_desc(user, course, 'refund'))
 
-        course.enrollment_start = (today - grace_period)
+        course_mode.expiration_date = (today - grace_period)
         self.assertTrue(access._has_access_course_desc(user, course, 'refund'))
 
         # After two weeks, user may no longer receive a refund
-        course.enrollment_start = (today - grace_period - one_day_extra)
+        course_mode.expiration_date = (today - grace_period - one_day_extra)
         self.assertFalse(access._has_access_course_desc(user, course, 'refund'))

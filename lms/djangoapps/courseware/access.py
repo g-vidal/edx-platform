@@ -14,6 +14,7 @@ from xmodule.modulestore import Location
 from xmodule.x_module import XModule, XModuleDescriptor
 
 from student.models import CourseEnrollmentAllowed
+from course_modes.models import CourseMode
 from external_auth.models import ExternalAuthMap
 from courseware.masquerade import is_masquerading_as_student
 from django.utils.timezone import UTC
@@ -209,16 +210,14 @@ def _has_access_course_desc(user, course, action):
         or not that deadline has passed; checking whether the student actually *purchased*
         a paid/verified certificate must be done elsewhere.
         """
-        now = datetime.now(UTC())
-        course_start = course.enrollment_start
-        # If there *is* no start date, user can be refunded
-        if course_start is None:
+        course_mode = CourseMode.mode_for_course(course.id, 'verified')
+        if course_mode is None:
+            return False
+        expiration_date = course_mode.expiration_date
+        now = datetime.now(UTC()).date()
+        if expiration_date is None:
             return True
-        # Presently, refunds are only allowed up to two weeks after the course
-        # start date.
-        grace_period = timedelta(days=14)
-        refund_end = course_start + grace_period
-        if (now.date() <= refund_end.date()):
+        if (now <= expiration_date):
             return True
         return False
 
