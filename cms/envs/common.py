@@ -240,16 +240,29 @@ STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 from rooted_paths import rooted_glob
 
 PIPELINE_CSS = {
-    'base-style': {
+    'style-vendor': {
         'source_filenames': [
+            'css/vendor/normalize.css',
+            'css/vendor/font-awesome.css',
             'js/vendor/CodeMirror/codemirror.css',
             'css/vendor/ui-lightness/jquery-ui-1.8.22.custom.css',
             'css/vendor/jquery.qtip.min.css',
-            'sass/base-style.css',
-            'xmodule/modules.css',
-            'xmodule/descriptor.css',
+            'js/vendor/markitup/skins/simple/style.css',
+            'js/vendor/markitup/sets/wiki/style.css',
         ],
-        'output_filename': 'css/cms-base-style.css',
+        'output_filename': 'css/cms-style-vendor.css',
+    },
+    'style-app': {
+        'source_filenames': [
+            'sass/style-app.css',
+        ],
+        'output_filename': 'css/cms-style-app.css',
+    },
+    'style-xmodule': {
+        'source_filenames': [
+            'sass/style-xmodule.css',
+        ],
+        'output_filename': 'css/cms-style-xmodule.css',
     },
 }
 
@@ -423,3 +436,9 @@ TRACKING_BACKENDS = {
 TRACKING_IGNORE_URL_PATTERNS = [r'^/event', r'^/login', r'^/heartbeat']
 TRACKING_ENABLED = True
 
+# Current youtube api for requesting transcripts.
+# for example: http://video.google.com/timedtext?lang=en&v=j_jEn79vS3g.
+YOUTUBE_API = {
+    'url': "http://video.google.com/timedtext",
+    'params': {'lang': 'en', 'v': 'set_youtube_id_of_11_symbols_here'}
+}

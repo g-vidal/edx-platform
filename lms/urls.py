@@ -274,8 +274,6 @@ if settings.COURSEWARE_ENABLED:
             'open_ended_grading.staff_grading_service.get_next', name='staff_grading_get_next'),
         url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/staff_grading/save_grade$',
             'open_ended_grading.staff_grading_service.save_grade', name='staff_grading_save_grade'),
-        url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/staff_grading/save_grade$',
-            'open_ended_grading.staff_grading_service.save_grade', name='staff_grading_save_grade'),
         url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/staff_grading/get_problem_list$',
             'open_ended_grading.staff_grading_service.get_problem_list', name='staff_grading_get_problem_list'),
 
@@ -333,8 +331,6 @@ if settings.COURSEWARE_ENABLED:
     # discussion forums live within courseware, so courseware must be enabled first
     if settings.MITX_FEATURES.get('ENABLE_DISCUSSION_SERVICE'):
         urlpatterns += (
-            url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/news$',
-                'courseware.views.news', name="news"),
             url(r'^courses/(?P<course_id>[^/]+/[^/]+/[^/]+)/discussion/',
                 include('django_comment_client.urls')),
             url(r'^notification_prefs/enable/', 'notification_prefs.views.ajax_enable'),

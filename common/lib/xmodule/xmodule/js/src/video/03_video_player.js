@@ -34,9 +34,7 @@ function (HTML5Video, Resizer) {
         state.videoPlayer.onPause       = _.bind(onPause, state);
         state.videoPlayer.onPlay        = _.bind(onPlay, state);
 
-        state.videoPlayer.onUnstarted = _.bind(
-            onUnstarted, state
-        );
+        state.videoPlayer.onUnstarted   = _.bind(onUnstarted, state);
 
         state.videoPlayer.handlePlaybackQualityChange = _.bind(
             handlePlaybackQualityChange, state
@@ -64,6 +62,14 @@ function (HTML5Video, Resizer) {
     function _initialize(state) {
         var youTubeId;
 
+        // The function is called just once to apply pre-defined configurations
+        // by student before video starts playing. Waits until the video's metadata
+        // is loaded, which normally happens just after the video starts playing.
+        // Just after that configurations can be applied.
+        state.videoPlayer.ready = _.once(function () {
+            state.videoPlayer.onSpeedChange(state.speed);
+        });
+
         if (state.videoType === 'youtube') {
             state.videoPlayer.PlayerState = YT.PlayerState;
             state.videoPlayer.PlayerState.UNSTARTED = -1;
@@ -86,13 +92,8 @@ function (HTML5Video, Resizer) {
             state.videoPlayer.playerVars.html5 = 1;
         }
 
-        if (state.config.start) {
-            state.videoPlayer.playerVars.start = state.config.start;
-            state.videoPlayer.playerVars.wmode = 'window';
-        }
-        if (state.config.end) {
-          state.videoPlayer.playerVars.end = state.config.end;
-        }
+        state.videoPlayer.playerVars.start = state.config.start;
+        state.videoPlayer.playerVars.end = state.config.end;
 
         // There is a bug which prevents YouTube API to correctly set the speed
         // to 1.0 from another speed in Firefox when in HTML5 mode. There is a
@@ -321,6 +322,8 @@ function (HTML5Video, Resizer) {
         if (this.config.show_captions) {
             this.trigger('videoCaption.play', null);
         }
+
+        this.videoPlayer.ready();
     }
 
     function onUnstarted() { }
@@ -474,6 +477,13 @@ function (HTML5Video, Resizer) {
             'videoProgressSlider.updatePlayTime',
             {
                 time: time,
+                duration: duration
+            }
+        );
+
+        this.trigger(
+            'videoProgressSlider.updateStartEndTimeRegion',
+            {
                 duration: duration
             }
         );

@@ -267,6 +267,29 @@ def register_user(request, extra_context=None):
     return render_to_response('register.html', context)
 
 
+def complete_course_mode_info(course_id, enrollment):
+    """
+    We would like to compute some more information from the given course modes
+    and the user's current enrollment
+
+    Returns the given information:
+        - whether to show the course upsell information
+        - numbers of days until they can't upsell anymore
+    """
+    modes = CourseMode.modes_for_course_dict(course_id)
+    mode_info = {'show_upsell': False, 'days_for_upsell': None}
+    # we want to know if the user is already verified and if verified is an
+    # option
+    if 'verified' in modes and enrollment.mode != 'verified':
+        mode_info['show_upsell'] = True
+        # if there is an expiration date, find out how long from now it is
+        if modes['verified'].expiration_date:
+            today = datetime.datetime.now(UTC).date()
+            mode_info['days_for_upsell'] = (modes['verified'].expiration_date - today).days
+
+    return mode_info
+
+
 @login_required
 @ensure_csrf_cookie
 def dashboard(request):
@@ -300,6 +323,7 @@ def dashboard(request):
     show_courseware_links_for = frozenset(course.id for course, _enrollment in courses
                                           if has_access(request.user, course, 'load'))
 
+    course_modes = {course.id: complete_course_mode_info(course.id, enrollment) for course, enrollment in courses}
     cert_statuses = {course.id: cert_info(request.user, course) for course, _enrollment in courses}
 
     # only show email settings for Mongo course and when bulk email is turned on
@@ -324,6 +348,7 @@ def dashboard(request):
                'staff_access': staff_access,
                'errored_courses': errored_courses,
                'show_courseware_links_for': show_courseware_links_for,
+               'all_course_modes': course_modes,
                'cert_statuses': cert_statuses,
                'show_email_settings_for': show_email_settings_for,
                }
@@ -1315,8 +1340,9 @@ def confirm_email_change(request, key):
         try:
             pec = PendingEmailChange.objects.get(activation_key=key)
         except PendingEmailChange.DoesNotExist:
+            response = render_to_response("invalid_email_key.html", {})
             transaction.rollback()
-            return render_to_response("invalid_email_key.html", {})
+            return response
 
         user = pec.user
         address_context = {
@@ -1325,8 +1351,9 @@ def confirm_email_change(request, key):
         }
 
         if len(User.objects.filter(email=pec.new_email)) != 0:
+            response = render_to_response("email_exists.html", {})
             transaction.rollback()
-            return render_to_response("email_exists.html", {})
+            return response
 
         subject = render_to_string('emails/email_change_subject.txt', address_context)
         subject = ''.join(subject.splitlines())
@@ -1342,9 +1369,10 @@ def confirm_email_change(request, key):
         try:
             user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
         except Exception:
-            transaction.rollback()
             log.warning('Unable to send confirmation email to old address', exc_info=True)
-            return render_to_response("email_change_failed.html", {'email': user.email})
+            response = render_to_response("email_change_failed.html", {'email': user.email})
+            transaction.rollback()
+            return response
 
         user.email = pec.new_email
         user.save()
@@ -1353,12 +1381,14 @@ def confirm_email_change(request, key):
         try:
             user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
         except Exception:
-            transaction.rollback()
             log.warning('Unable to send confirmation email to new address', exc_info=True)
-            return render_to_response("email_change_failed.html", {'email': pec.new_email})
+            response = render_to_response("email_change_failed.html", {'email': pec.new_email})
+            transaction.rollback()
+            return response
 
+        response = render_to_response("email_change_successful.html", address_context)
         transaction.commit()
-        return render_to_response("email_change_successful.html", address_context)
+        return response
     except Exception:
         # If we get an unexpected exception, be sure to rollback the transaction
         transaction.rollback()
