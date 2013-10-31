@@ -309,6 +309,9 @@ oauth_consumer_key="", oauth_signature="frVp4JuvT1mVXlxktiAUjQ7%2F1cw%3D"'}
         params.update(body)
         return params
 
+    def get_score(self):
+        return None
+
 
 
 
@@ -316,4 +319,8 @@ class LTIModuleDescriptor(LTIFields, MetadataOnlyEditingDescriptor, EmptyDataRaw
     """
     Descriptor for LTI Xmodule.
     """
+    always_recalculate_grades = True
+    has_score = True
+    graded = True
+
     module_class = LTIModule
